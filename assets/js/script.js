@@ -1,58 +1,99 @@
 $(document).ready(function () {
   reset();
-  var arrPc = randomPcNums(5, 1, 100);
+  var arrPc = [];
   var yourArr = [];
+  var arrResult = [];
+  var limit = 5;
 
-  //Eventi
+  //Array con numeri del PC
+  for (var i = 0; i < limit; i++) {
+    var numberRand = randomNumGen(1, 100);
+    if (!arrPc.includes(numberRand)) {
+      arrPc.push(numberRand);
+    }
+  }
+  console.log("Array con numeri PC: " + arrPc);
 
-  //Al click del bottone start
+  //Al click del bottone "VIA" faccio apparire box e tasto restart, faccio scomparire il primo bottone e mostro a schermo i numeri del PC per 5 secondi.
   $("#start").click(function () {
     $(this).hide();
-    printOutput(arrPc.toString(), "#display");
+    setTimeout(function () {
+      printOutput("I numeri del Pc: " + arrPc.join("-"), "#display");
+    }, 500);
 
     setTimeout(function () {
-      printOutput("Indovina i 5 numeri: ", "#display");
+      printOutput("Inserisci i " + limit + " numeri", "#display");
       $(".box").show();
     }, 5000);
   });
 
-  //Al click del bottone invia
-
+  //Al click dell'invio, aggiungo ad un array con i miei numeri scritti in input
   $("#send").click(function () {
-    var yourArr = yourNums(yourArr(yourArr));
-    console.log(yourArr);
+    if (yourArr.length < limit) {
+      if (!yourArr.includes($("input").val())) {
+        yourArr.push($("input").val());
+      } else {
+        alert("ATTENZIONE! Numero già inserito.");
+      }
+    }
+    $("input").val(""); // per "pulire" il campo input
+    console.log("Array con numeri inseriti in input: " + yourArr);
+    //Controllo per vedere quali numeri sono stati indovinati
+    if (yourArr.length === limit) {
+      $(".box").hide();
+      for (var num of yourArr) {
+        if (arrPc.includes(parseInt(num))) {
+          arrResult.push(num);
+        }
+      }
+      console.log("Numeri indovinati: " + arrResult);
+      printOutput("Calcolo in corso...", "#display");
+      setTimeout(function () {
+        if (arrResult.length === 0) {
+          printOutput("Zero numeri indovinati...HAI PERSO!", "#display");
+        } else if (arrResult.length === limit) {
+          printOutput(
+            "COMPLIMENTI! HAI INDOVINATO TUTTI I NUMERI!",
+            "#display"
+          );
+        } else if (arrResult.length === 1) {
+          printOutput(
+            "Complimenti, hai indovinato un numero, ovvero: " +
+              arrResult.join(),
+            "#display"
+          );
+        } else {
+          printOutput(
+            "Complimenti, hai indovinato " +
+              arrResult.length +
+              " numeri, ovvero: " +
+              arrResult.join("-"),
+            "#display"
+          );
+        }
+        $("restart").show();
+      }, 3000);
+    }
   });
+});
+
+//Al click del bottone restart
+$("#restart").click(function () {
+  reset();
 });
 
 //funzioni
 
-//funzione reset
-
 function reset() {
-  printOutput("Clicca Start!", "#display");
-  $("#start").show();
+  printOutput("Clicca VIA per iniziare!", "#display");
   $(".box").hide();
+  $("#restart").hide();
 }
-
-//funzione per stampare output
 
 function printOutput(output, target) {
   $(target).text(output);
 }
 
-//funzione per generare numeri casuali per il PC
-
-function randomPcNums(dim, min, max) {
-  var arrNums = [];
-  while (arrNums.length < dim) {
-    arrNums.push(Math.floor(Math.random() * (max - min + 1) + min));
-  }
-
-  return arrNums;
-}
-
-//funzione per conservare in un array i numeri inseriti in input
-
-function yourNums(arr) {
-  arr.push($("input").val());
+function randomNumGen(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }
